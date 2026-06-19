@@ -1,0 +1,227 @@
+@host = http://localhost:3001
+@mcpEndpoint = {{host}}/mcp
+# 初始化请求成功后，把响应头中的 Mcp-Session-Id 填到这里，用于后续 MCP 请求。
+@mcpSessionId = replace-with-mcp-session-id
+# 替换为本机实际 HAR 文件路径。
+@harFilePath = C:\\path\\to\\example.har
+
+### 服务信息
+GET {{host}}/
+Accept: application/json
+
+### MCP 初始化
+POST {{mcpEndpoint}}
+Accept: application/json, text/event-stream
+Content-Type: application/json
+
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {},
+    "clientInfo": {
+      "name": "Bunsei.Mcp.Har.http",
+      "version": "1.0.0"
+    }
+  }
+}
+
+### MCP 初始化完成通知
+POST {{mcpEndpoint}}
+Accept: application/json, text/event-stream
+Content-Type: application/json
+Mcp-Session-Id: {{mcpSessionId}}
+
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/initialized"
+}
+
+### 列出 MCP 工具
+POST {{mcpEndpoint}}
+Accept: application/json, text/event-stream
+Content-Type: application/json
+Mcp-Session-Id: {{mcpSessionId}}
+
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/list",
+  "params": {}
+}
+
+### 列出可用 HAR 文件
+POST {{mcpEndpoint}}
+Accept: application/json, text/event-stream
+Content-Type: application/json
+Mcp-Session-Id: {{mcpSessionId}}
+
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": {
+    "name": "ListAvailableHarFiles",
+    "arguments": {
+      "offset": 0,
+      "limit": 20
+    }
+  }
+}
+
+### 加载 HAR 文件
+POST {{mcpEndpoint}}
+Accept: application/json, text/event-stream
+Content-Type: application/json
+Mcp-Session-Id: {{mcpSessionId}}
+
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "tools/call",
+  "params": {
+    "name": "LoadHarFileAsync",
+    "arguments": {
+      "filePath": "{{harFilePath}}"
+    }
+  }
+}
+
+### 获取当前 HAR 文件信息
+POST {{mcpEndpoint}}
+Accept: application/json, text/event-stream
+Content-Type: application/json
+Mcp-Session-Id: {{mcpSessionId}}
+
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "method": "tools/call",
+  "params": {
+    "name": "GetCurrentHarInfo",
+    "arguments": {}
+  }
+}
+
+### 获取 HAR 汇总分析
+POST {{mcpEndpoint}}
+Accept: application/json, text/event-stream
+Content-Type: application/json
+Mcp-Session-Id: {{mcpSessionId}}
+
+{
+  "jsonrpc": "2.0",
+  "id": 6,
+  "method": "tools/call",
+  "params": {
+    "name": "GetHarSummary",
+    "arguments": {
+      "maxReturnedRequests": 20,
+      "slowRequestThresholdMilliseconds": 1000
+    }
+  }
+}
+
+### 分页列出 HAR 请求
+POST {{mcpEndpoint}}
+Accept: application/json, text/event-stream
+Content-Type: application/json
+Mcp-Session-Id: {{mcpSessionId}}
+
+{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "method": "tools/call",
+  "params": {
+    "name": "ListHarRequests",
+    "arguments": {
+      "offset": 0,
+      "limit": 20
+    }
+  }
+}
+
+### 搜索失败请求
+POST {{mcpEndpoint}}
+Accept: application/json, text/event-stream
+Content-Type: application/json
+Mcp-Session-Id: {{mcpSessionId}}
+
+{
+  "jsonrpc": "2.0",
+  "id": 8,
+  "method": "tools/call",
+  "params": {
+    "name": "SearchHarRequests",
+    "arguments": {
+      "minStatus": 400,
+      "offset": 0,
+      "limit": 20
+    }
+  }
+}
+
+### 获取请求时间线
+POST {{mcpEndpoint}}
+Accept: application/json, text/event-stream
+Content-Type: application/json
+Mcp-Session-Id: {{mcpSessionId}}
+
+{
+  "jsonrpc": "2.0",
+  "id": 9,
+  "method": "tools/call",
+  "params": {
+    "name": "GetHarTimeline",
+    "arguments": {
+      "offset": 0,
+      "limit": 50
+    }
+  }
+}
+
+### 获取指定请求完整详情
+POST {{mcpEndpoint}}
+Accept: application/json, text/event-stream
+Content-Type: application/json
+Mcp-Session-Id: {{mcpSessionId}}
+
+{
+  "jsonrpc": "2.0",
+  "id": 10,
+  "method": "tools/call",
+  "params": {
+    "name": "GetHarRequestFullDetail",
+    "arguments": {
+      "requestIndex": 0
+    }
+  }
+}
+
+### 读取指定请求响应体片段
+POST {{mcpEndpoint}}
+Accept: application/json, text/event-stream
+Content-Type: application/json
+Mcp-Session-Id: {{mcpSessionId}}
+
+{
+  "jsonrpc": "2.0",
+  "id": 11,
+  "method": "tools/call",
+  "params": {
+    "name": "GetHarResponseBodyChunk",
+    "arguments": {
+      "requestIndex": 0,
+      "offset": 0,
+      "length": 4096,
+      "format": "Text",
+      "textEncodingName": "utf-8"
+    }
+  }
+}
+
+### Legacy SSE 端点连通性检查
+GET {{host}}/sse
+Accept: text/event-stream

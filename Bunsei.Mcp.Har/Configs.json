@@ -1,0 +1,15 @@
+{
+  "Har": {
+    "ScanDirectory": ".",
+    "SearchPattern": "*.har",
+    "Recursive": false,
+    "MaxFiles": 500
+  },
+  "Kestrel": {
+    "Endpoints": {
+      "Http": {
+        "Url": "http://localhost:3001"
+      }
+    }
+  }
+}
